@@ -1,26 +1,30 @@
-# DispatchLens - FMCSA Backend Integration Proof-of-Concept
+# DispatchLens — Carrier Intelligence Backend
 
-A lightweight Django REST Framework proof-of-concept for **DispatchLens** that connects to the official **FMCSA QCMobile API**, retrieves carrier information using a DOT number, combines responses across multiple FMCSA endpoints, normalizes carrier records, and persists them into a MySQL/SQLite compatible database.
-
----
+A lightweight Django REST Framework proof of concept for **DispatchLens**, a carrier intelligence tool designed to help truck dispatchers retrieve, organize, and analyze carrier information through a unified API.
 
 ## Features
 
-- **Official FMCSA Integration**: Connects to `https://mobile.fmcsa.dot.gov/qc/services`.
-- **Multi-Endpoint Aggregation**: Queries and merges six FMCSA endpoints:
-  - `/carriers/{DOT}`
-  - `/carriers/{DOT}/basics`
-  - `/carriers/{DOT}/cargo-carried`
-  - `/carriers/{DOT}/operation-classification`
-  - `/carriers/{DOT}/docket-numbers`
-  - `/carriers/{DOT}/authority`
-- **Data Normalization**: Converts raw FMCSA JSON into a standardized carrier structure.
-- **MC Number Extraction**: Automatically extracts prefix (e.g. `MC`) and numeric docket ID (e.g. `1670397`).
-- **Database Persistence**: Stores normalized records in a MySQL-compatible `Carrier` model.
-- **Robust Error Handling**: Handles network timeouts, HTTP errors, invalid DOT formats, and missing optional endpoints without leaking `FMCSA_WEB_KEY`.
-- **Automated Mock Test Suite**: Includes a unit test suite mocking FMCSA responses.
+- **Carrier Lookup:** Retrieve carrier information using a DOT number.
+- **Multi-Source Data Aggregation:** Combines information from multiple data endpoints into a unified carrier record.
+- **Data Normalization:** Converts raw responses into a consistent, structured format.
+- **MC Number Extraction:** Identifies MC prefixes and numeric docket identifiers.
+- **Authority & Operating Status:** Organizes carrier authority and operating-status information.
+- **Insurance Information:** Structures available insurance requirements and filing details.
+- **Safety & Compliance Data:** Supports structured safety records, inspection statistics, and crash information.
+- **Equipment & Fleet Information:** Stores fleet size, driver counts, and related carrier attributes.
+- **Database Persistence:** Supports MySQL and SQLite for storing normalized carrier records.
+- **Error Handling:** Handles invalid input, missing records, request timeouts, and service errors without exposing sensitive credentials.
+- **Automated Testing:** Includes unit tests with mocked external requests to verify data processing, error handling, and database operations.
 
----
+## Tech Stack
+
+- Python 3.10+
+- Django
+- Django REST Framework
+- MySQL / SQLite
+- Python `requests`
+- Environment-based configuration
+- Automated unit testing
 
 ## Project Structure
 
@@ -49,62 +53,65 @@ dispatchlens/
         └── fmcsa_service.py
 ```
 
----
-
 ## Setup & Installation
 
-### 1. Prerequisites
+### Prerequisites
 
-- Python 3.10+
-- `pip` package manager
+- Python 3.10 or newer
+- pip
 
-### 2. Create and Activate Virtual Environment
+### 1. Create a Virtual Environment
 
-**Windows (PowerShell):**
+**Windows (PowerShell)**
+
 ```powershell
 python -m venv venv
 .\venv\Scripts\Activate.ps1
 ```
 
-**Windows (Command Prompt):**
+**Windows (Command Prompt)**
+
 ```cmd
 python -m venv venv
 venv\Scripts\activate.bat
 ```
 
-**macOS / Linux:**
+**macOS / Linux**
+
 ```bash
 python3 -m venv venv
 source venv/bin/activate
 ```
 
-### 3. Install Dependencies
+### 2. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Configure Environment Variables (`.env`)
+### 3. Configure Environment Variables
 
-Copy `.env.example` to create `.env`:
+Create a local `.env` file from the provided example.
+
+**Windows (PowerShell)**
+
+```powershell
+Copy-Item .env.example .env
+```
+
+**macOS / Linux**
 
 ```bash
-# On Windows PowerShell
-Copy-Item .env.example .env
-
-# On Linux/macOS
 cp .env.example .env
 ```
 
-Open `.env` and set your `FMCSA_WEB_KEY`:
+Configure your local environment:
 
 ```env
-FMCSA_WEB_KEY=your_actual_fmcsa_web_key
-SECRET_KEY=django-insecure-dispatchlens-poc-key-2026
+SECRET_KEY=replace_with_a_secure_secret
 DEBUG=True
 ALLOWED_HOSTS=localhost,127.0.0.1
 
-# MySQL Database Configuration (Optional: defaults to SQLite if DB_NAME is omitted)
 DB_ENGINE=django.db.backends.mysql
 DB_NAME=dispatchlens_db
 DB_USER=root
@@ -113,111 +120,65 @@ DB_HOST=127.0.0.1
 DB_PORT=3306
 ```
 
-> **Note**: If `DB_NAME` is left blank or omitted, Django automatically falls back to an SQLite database (`db.sqlite3`), allowing instant out-of-the-box local testing.
+Configure any required external service credentials using the appropriate environment variables. Never commit real credentials or production secrets to version control.
 
-### 5. Run Database Migrations
+**Database configuration:** The application can use SQLite for local development or MySQL when configured. Confirm that your Django settings support the intended fallback behavior.
+
+### 4. Apply Database Migrations
 
 ```bash
 python manage.py makemigrations
 python manage.py migrate
 ```
 
----
-
-## Running the Server
-
-Start the Django development server:
+### 5. Start the Development Server
 
 ```bash
 python manage.py runserver
 ```
 
-The API will be available at `http://127.0.0.1:8000/`.
+The local development server will be available at:
 
----
+`http://127.0.0.1:8000/`
 
 ## API Documentation
 
-### Get Normalized Carrier Information
+### Retrieve Carrier Information
 
-- **Endpoint**: `GET /api/carriers/<dot_number>/`
-- **Example Request**:
-  ```text
-  GET http://127.0.0.1:8000/api/carriers/4202109/
-  ```
+**Endpoint**
 
-#### Example Success Response (HTTP 200 OK):
-
-```json
-{
-  "success": true,
-  "carrier": {
-    "dot_number": 4202109,
-    "mc_number": 1670397,
-    "mc_prefix": "MC",
-    "legal_name": "RP TRANSPORT LLC",
-    "dba_name": null,
-    "allowed_to_operate": true,
-    "carrier_operation_code": "C",
-    "carrier_operation_description": "Interstate",
-    "common_authority_status": "A",
-    "contract_authority_status": "N",
-    "broker_authority_status": "N",
-    "authorized_for_property": true,
-    "authorized_for_broker": false,
-    "authorized_for_household_goods": false,
-    "authorized_for_passenger": false,
-    "phy_street": "123 MAIN ST",
-    "phy_city": "MISSION",
-    "phy_state": "TX",
-    "phy_zipcode": "78573",
-    "phy_country": "US",
-    "total_drivers": 5,
-    "total_power_units": 3,
-    "bipd_insurance_on_file": "Y",
-    "bipd_insurance_required": "Y",
-    "bipd_required_amount": 750000,
-    "cargo_insurance_on_file": "N",
-    "cargo_insurance_required": "N",
-    "bond_insurance_on_file": "N",
-    "bond_insurance_required": "N",
-    "crash_total": 0,
-    "fatal_crash": 0,
-    "inj_crash": 0,
-    "towaway_crash": 0,
-    "driver_insp": 10,
-    "driver_oos_insp": 1,
-    "driver_oos_rate": 10.0,
-    "driver_oos_rate_national_average": 5.5,
-    "vehicle_insp": 15,
-    "vehicle_oos_insp": 2,
-    "vehicle_oos_rate": 13.3,
-    "vehicle_oos_rate_national_average": 20.1,
-    "hazmat_insp": 0,
-    "hazmat_oos_insp": 0,
-    "hazmat_oos_rate": null,
-    "hazmat_oos_rate_national_average": null,
-    "safety_rating": "SATISFACTORY",
-    "safety_rating_date": "2022-01-15",
-    "oos_date": null,
-    "status_code": "A",
-    "operation_classification": [
-      "Authorized For Hire"
-    ],
-    "cargo_carried": [
-      "General Freight"
-    ],
-    "created_at": "2026-10-08T21:00:00Z",
-    "updated_at": "2026-10-08T21:00:00Z"
-  }
-}
+```http
+GET /api/carriers/<dot_number>/
 ```
 
----
+**Example request**
+
+```http
+GET /api/carriers/4202109/
+```
+
+### Successful Response
+
+Returns a normalized carrier record containing available information such as:
+
+- DOT and MC identifiers
+- Legal business name and DBA
+- Operating and authority status
+- Insurance filing details
+- Physical address
+- Driver and vehicle counts
+- Safety ratings and inspection statistics
+- Crash statistics
+- Operation classifications
+- Cargo categories
+- Record creation and update timestamps
+
+The exact fields depend on the information available for the requested carrier.
 
 ### Error Responses
 
-#### 1. Invalid DOT Number (HTTP 400 Bad Request)
+**400 — Invalid Input**
+
 ```json
 {
   "success": false,
@@ -225,7 +186,8 @@ The API will be available at `http://127.0.0.1:8000/`.
 }
 ```
 
-#### 2. Carrier Not Found (HTTP 404 Not Found)
+**404 — Carrier Not Found**
+
 ```json
 {
   "success": false,
@@ -233,29 +195,43 @@ The API will be available at `http://127.0.0.1:8000/`.
 }
 ```
 
-#### 3. FMCSA Service Unavailable (HTTP 503 Service Unavailable)
+**503 — Service Unavailable**
+
 ```json
 {
   "success": false,
-  "error": "FMCSA service temporarily unavailable"
+  "error": "Carrier information service temporarily unavailable"
 }
 ```
 
----
-
 ## Running Automated Tests
 
-Run the Django test suite (which mocks all FMCSA HTTP requests):
+Execute the test suite with:
 
 ```bash
 python manage.py test
 ```
 
-### Test Coverage Highlights
-1. Successful carrier lookup & data normalization.
-2. Handling carrier endpoints with empty content arrays.
-3. Validation of invalid DOT numbers.
-4. Handling FMCSA HTTP 500 API errors.
-5. Handling FMCSA connection timeouts.
-6. Docket number / MC prefix and number parsing.
-7. Serializer & database persistence verification.
+The tests cover:
+
+1. Successful carrier lookups and data normalization.
+2. Handling of empty or missing optional data.
+3. Invalid DOT number validation.
+4. External service errors.
+5. Network connection timeouts.
+6. MC identifier parsing.
+7. Serialization and database persistence.
+
+## Security & Configuration
+
+- Store credentials and secret keys in environment variables.
+- Keep `.env` and other sensitive configuration files out of Git.
+- Use secure settings for production deployments.
+- Avoid exposing internal exception details or credentials in API responses.
+- Validate and sanitize incoming request parameters.
+
+## Project Status
+
+**Proof of Concept (PoC)**
+
+DispatchLens is being developed to simplify carrier research through structured data retrieval, normalization, and a unified API. The backend provides a foundation for future search, filtering, and carrier discovery capabilities.
