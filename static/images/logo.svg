@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <!-- Outer Magnifying Glass Circle & Handle -->
+  <g fill="none" stroke="currentColor" stroke-width="26" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Magnifying Glass Lens Circle -->
+    <circle cx="210" cy="210" r="160" />
+    
+    <!-- Magnifying Glass Handle -->
+    <line x1="325" y1="325" x2="440" y2="440" stroke-width="48" />
+
+    <!-- Truck Cargo Body -->
+    <rect x="110" y="150" width="145" height="120" rx="6" />
+
+    <!-- Truck Cab -->
+    <path d="M 255 175 L 295 175 L 330 220 L 330 270 L 255 270 Z" />
+
+    <!-- Truck Cab Window -->
+    <path d="M 268 190 L 292 190 L 316 222 L 268 222 Z" fill="currentColor" stroke="none" />
+
+    <!-- Front & Rear Wheels -->
+    <circle cx="160" cy="285" r="22" fill="none" stroke-width="20" />
+    <circle cx="290" cy="285" r="22" fill="none" stroke-width="20" />
+  </g>
+</svg>

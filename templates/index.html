@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>DispatchLens — FMCSA & MC Scraper</title>
+    <meta name="description" content="Instant USA motor carrier search and MC authority verification powered directly by official FMCSA census records.">
+    {% load static %}
+    <!-- Tailwind CSS CDN with Forms Plugin -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Custom Configuration for DispatchLens Brand Colors -->
+    <script>
+        tailwind.config = {
+          theme: {
+            extend: {
+              colors: {
+                brand: {
+                  navy: '#0e2544',
+                  navyDeep: '#0c1f38',
+                  orange: '#f58220',
+                  orangeHover: '#e07113',
+                  darkNavy: '#0c1f38',
+                  amberBtn: '#eab308',
+                  orangeBtn: '#f97316',
+                  alertBg: '#fffbeb',
+                  alertBorder: '#fde68a',
+                  alertText: '#92400e',
+                  dark: '#0f172a',
+                  muted: '#64748b',
+                  lightGray: '#f8fafc',
+                  border: '#e2e8f0',
+                }
+              },
+              fontFamily: {
+                sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+              }
+            }
+          }
+        }
+    </script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+          font-family: 'Inter', sans-serif;
+          background-color: #f8fafc;
+          color: #1e293b;
+          -webkit-font-smoothing: antialiased;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-50">
+    <div id="root"></div>
+    <script type="module" src="{% static 'dist/assets/index.js' %}"></script>
+</body>
+</html>
